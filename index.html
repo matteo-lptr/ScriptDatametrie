@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Récapitulative</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 80%;
+            max-width: 800px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .checkmark {
+            color: green;
+            font-weight: bold;
+        }
+        .exclamation {
+            color: red;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
+        footer {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tableau de Performance</h1>
+
+    <table id="performanceTable">
+        <thead>
+            <tr id="weekDates">
+                <th>Semaine</th>
+                <!-- Les dates seront insérées ici par JavaScript -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Performance</td>
+                <!-- Les données de performance seront ajoutées ici -->
+            </tr>
+            <tr>
+                <td>Disponibilité</td>
+                <!-- Les données de disponibilité seront ajoutées ici -->
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Objectifs fixés</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Objectifs</th>
+                <th>Atteint</th>
+                <th>Partiellement atteint</th>
+                <th>Non atteint</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Performance</td>
+                <td class="checkmark">✔<br>1 s</td>
+                <td class="warning">⚠<br>2 s</td>
+                <td class="exclamation">❗</td>
+            </tr>
+            <tr>
+                <td>Disponibilité</td>
+                <td class="checkmark">✔<br>99.8 %</td>
+                <td class="warning">⚠<br>98.5 %</td>
+                <td class="exclamation">❗</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Statistiques de Temps de Réponse</h2>
+    <ul style="list-style-type:none; padding-left:0;">
+        <li>Temps de réponse minimum: <span id="minResponse">N/A</span></li>
+        <li>Temps de réponse maximum: <span id="maxResponse">N/A</span></li>
+        <li>Temps de réponse moyen: <span id="avgResponse">N/A</span></li>
+    </ul>
+
+    <footer>
+        <p>Créé le : <span id="creationDate"></span></p>
+    </footer>
+
+    <!-- Référencez le fichier JavaScript généré -->
+    <script src="resultats.js"></script>
+
+    <!-- Script pour gérer les dates et afficher les résultats -->
+    <script>
+        // Fonction pour obtenir les dates de la semaine actuelle
+        function getWeekDates() {
+            const today = new Date();
+            const firstDayOfWeek = today.getDate() - today.getDay() + 1;
+            const weekDates = [];
+            for (let i = 0; i <= 6; i++) {
+                const date = new Date(today.setDate(firstDayOfWeek + i));
+                weekDates.push(date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+            }
+            return weekDates;
+        }
+
+        // Insérer les dates dans le tableau
+        const weekDays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+        const weekDates = getWeekDates();
+        const weekRow = document.getElementById('weekDates');
+        for (let i = 0; i <= 6; i++) {
+            const th = document.createElement('th');
+            th.innerHTML = `${weekDays[i]}<br>${weekDates[i]}`;
+            weekRow.appendChild(th);
+        }
+
+        // Afficher la date actuelle dans le footer
+        document.getElementById('creationDate').textContent = new Date().toLocaleString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Afficher les résultats du script Bash
+        document.getElementById('minResponse').textContent = resultats.tempsRepMin;
+        document.getElementById('maxResponse').textContent = resultats.tempsRepMax;
+        document.getElementById('avgResponse').textContent = resultats.tempsRepMoy;
+    </script>
+
+</body>
+</html>
