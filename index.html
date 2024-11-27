@@ -37,12 +37,12 @@
             color: green;
             font-weight: bold;
         }
-        .exclamation {
-            color: red;
-            font-weight: bold;
-        }
         .warning {
             color: orange;
+            font-weight: bold;
+        }
+        .exclamation {
+            color: red;
             font-weight: bold;
         }
         footer {
@@ -56,18 +56,14 @@
     <table id="performanceTable">
         <thead>
             <tr id="weekDates">
-                <th>Semaine</th>
-                <!-- Les dates seront insérées ici par JavaScript -->
+                <th>Jour</th>
+                <!-- Les jours de la semaine et les dates seront insérés ici -->
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>Performance</td>
                 <!-- Les données de performance seront ajoutées ici -->
-            </tr>
-            <tr>
-                <td>Disponibilité</td>
-                <!-- Les données de disponibilité seront ajoutées ici -->
             </tr>
         </tbody>
     </table>
@@ -90,12 +86,6 @@
                 <td class="warning">⚠<br>2 s</td>
                 <td class="exclamation">❗</td>
             </tr>
-            <tr>
-                <td>Disponibilité</td>
-                <td class="checkmark">✔<br>99.8 %</td>
-                <td class="warning">⚠<br>98.5 %</td>
-                <td class="exclamation">❗</td>
-            </tr>
         </tbody>
     </table>
 
@@ -109,35 +99,86 @@
     <footer>
         <p>Créé le : <span id="creationDate"></span></p>
     </footer>
-
-    <!-- Référencez le fichier JavaScript généré -->
     <script src="resultats.js"></script>
-
-    <!-- Script pour gérer les dates et afficher les résultats -->
     <script>
-        // Fonction pour obtenir les dates de la semaine actuelle
+        // Function to get dates for the current week and days of the week
         function getWeekDates() {
             const today = new Date();
-            const firstDayOfWeek = today.getDate() - today.getDay() + 1;
             const weekDates = [];
-            for (let i = 0; i <= 6; i++) {
+            const weekDays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+
+            // Calculate Monday as the first day of the week
+            const firstDayOfWeek = today.getDate() - today.getDay() + 1;
+            for (let i = 0; i < 7; i++) {
                 const date = new Date(today.setDate(firstDayOfWeek + i));
-                weekDates.push(date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+                weekDates.push({
+                    day: weekDays[i],
+                    date: date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                });
             }
             return weekDates;
         }
 
-        // Insérer les dates dans le tableau
-        const weekDays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+        // Display the days and dates in the table header
         const weekDates = getWeekDates();
         const weekRow = document.getElementById('weekDates');
-        for (let i = 0; i <= 6; i++) {
+        weekDates.forEach(entry => {
             const th = document.createElement('th');
-            th.innerHTML = `${weekDays[i]}<br>${weekDates[i]}`;
+            th.innerHTML = `${entry.day}<br>${entry.date}`;
             weekRow.appendChild(th);
+        });
+
+        // Thresholds for ping evaluation (in seconds)
+        const thresholds = {
+            good: 1,    // 1 second or below
+            warning: 2  // 2 seconds or below
+        };
+
+        // Function to determine color class based on ping value in seconds
+        function getColorClass(value) {
+            if (value <= thresholds.good) {
+                return "checkmark"; // Green
+            } else if (value <= thresholds.warning) {
+                return "warning"; // Yellow
+            } else {
+                return "exclamation"; // Red
+            }
         }
 
-        // Afficher la date actuelle dans le footer
+        // Populate the performance grid with ping data
+        function populatePerformanceGrid() {
+            const performanceRow = document.querySelector("#performanceTable tbody tr:first-child");
+
+            weekDates.forEach(entry => {
+                const td = document.createElement("td");
+
+                // Get ping data for the current day from resultats.js
+                const dayData = resultats.data[entry.day] || []; // Ping times in seconds
+
+                if (dayData.length > 0) {
+                    // Create a colored list of ping values
+                    const ul = document.createElement("ul");
+                    dayData.forEach(ping => {
+                        const li = document.createElement("li");
+                        li.textContent = `${ping.toFixed(2)} s`; // Display with 2 decimal places
+                        li.className = getColorClass(ping); // Assign the color class
+                        ul.appendChild(li);
+                    });
+                    td.appendChild(ul);
+                } else {
+                    td.textContent = "N/A"; // No data for the day
+                }
+
+                performanceRow.appendChild(td);
+            });
+        }
+
+        // Populate response statistics
+        document.getElementById('minResponse').textContent = `${resultats.tempsRepMin.toFixed(2)} s`;
+        document.getElementById('maxResponse').textContent = `${resultats.tempsRepMax.toFixed(2)} s`;
+        document.getElementById('avgResponse').textContent = `${resultats.tempsRepMoy.toFixed(2)} s`;
+
+        // Display creation date in the footer
         document.getElementById('creationDate').textContent = new Date().toLocaleString('fr-FR', {
             year: 'numeric',
             month: 'long',
@@ -146,11 +187,10 @@
             minute: '2-digit'
         });
 
-        // Afficher les résultats du script Bash
-        document.getElementById('minResponse').textContent = resultats.tempsRepMin;
-        document.getElementById('maxResponse').textContent = resultats.tempsRepMax;
-        document.getElementById('avgResponse').textContent = resultats.tempsRepMoy;
+        // Call function to populate the performance grid
+        populatePerformanceGrid();
     </script>
 
+    <script src="resultats.js"></script>
 </body>
 </html>
